@@ -1,0 +1,87 @@
+buildscript {
+	ext {
+		kotlinVersion = '1.2.71'
+		springBootVersion = '2.1.0.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+		classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+	}
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-spring'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'org.bk.samples'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+compileKotlin {
+	kotlinOptions {
+		freeCompilerArgs = ["-Xjsr305=strict"]
+		jvmTarget = "1.8"
+	}
+}
+compileTestKotlin {
+	kotlinOptions {
+		freeCompilerArgs = ["-Xjsr305=strict"]
+		jvmTarget = "1.8"
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://s3-us-west-2.amazonaws.com/dynamodb-local/release'
+	}
+}
+
+dependencies {
+	implementation('org.springframework.boot:spring-boot-starter-actuator')
+	implementation('org.springframework.boot:spring-boot-starter-webflux')
+	implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
+	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+	implementation("software.amazon.awssdk:dynamodb")
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: "junit", module: "junit"
+	}
+	testImplementation("org.junit.jupiter:junit-jupiter-api")
+	testRuntime("org.junit.jupiter:junit-jupiter-engine")
+
+	testImplementation('io.projectreactor:reactor-test')
+
+	testImplementation("com.amazonaws:DynamoDBLocal:1.11.119")
+
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom 'software.amazon.awssdk:bom:2.0.0'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+task copyNativeDeps(type: Copy) {
+	mkdir "build/native-libs"
+	from(configurations.testCompileClasspath) {
+		include '*.dll'
+		include '*.dylib'
+		include '*.so'
+	}
+	into 'build/native-libs'
+}
+
+test {
+	dependsOn copyNativeDeps
+}
