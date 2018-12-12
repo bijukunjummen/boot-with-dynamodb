@@ -51,7 +51,7 @@ class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
         if (this.server != null) {
             this.server!!.stop()
             System.clearProperty("aws.accessKeyId")
-            System.clearProperty("aws.secretKey")
+            System.clearProperty("aws.secretAccessKey")
         }
 
     }
