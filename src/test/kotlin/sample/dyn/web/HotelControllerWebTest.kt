@@ -4,6 +4,8 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -29,8 +31,10 @@ class HotelControllerWebTest {
     @Test
     fun testCreateHotel() {
         val expectedHotel = Hotel(id = "1", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
+
         whenever(hotelRepo.saveHotel(any()))
                 .thenReturn(Mono.just(expectedHotel))
+
 
         webTestClient.post()
                 .uri("/hotels")
@@ -57,6 +61,70 @@ class HotelControllerWebTest {
                     |   "state": "OR"
                     | }
 
+                """.trimMargin())
+    }
+
+    @Test
+    fun testUpdateHotelWithNoExistingEntity() {
+
+        whenever(hotelRepo.getHotel(ArgumentMatchers.anyString()))
+                .thenReturn(Mono.empty())
+
+
+        webTestClient.put()
+                .uri("/hotels/2")
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .body(BodyInserters
+                        .fromObject("""
+                            | {
+                            |   "id": "2",
+                            |   "name": "Test Hotel",
+                            |   "zip": "zip",
+                            |   "address": "Test Address",
+                            |   "state": "OR"
+                            | }
+                            """.trimMargin()))
+                .exchange()
+                .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testUpdateAnExistingEntity() {
+        val expectedHotel = Hotel(id = "2", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
+
+        whenever(hotelRepo.getHotel(Mockito.anyString()))
+                .thenReturn(Mono.just(expectedHotel))
+
+        whenever(hotelRepo.saveHotel(any()))
+                .thenAnswer { invocation ->
+                    val hotel: Hotel = invocation.getArgument(0)
+                    Mono.just(hotel)
+                }
+
+        webTestClient.put()
+                .uri("/hotels/2")
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .body(BodyInserters
+                        .fromObject("""
+                            | {
+                            |   "id": "2",
+                            |   "name": "Test Hotel Updated",
+                            |   "zip": "zip",
+                            |   "address": "Test Address",
+                            |   "state": "OR"
+                            | }
+                            """.trimMargin()))
+                .exchange()
+                .expectStatus().isCreated
+                .expectBody()
+                .json("""
+                    | {
+                    |   "id": "2",
+                    |   "name": "Test Hotel Updated",
+                    |   "zip": "zip",
+                    |   "address": "Test Address",
+                    |   "state": "OR"
+                    | }
                 """.trimMargin())
     }
 }

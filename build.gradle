@@ -13,6 +13,12 @@ buildscript {
 	}
 }
 
+plugins {
+	id 'com.google.cloud.tools.jib' version '0.10.1'
+	id "com.gorylenko.gradle-git-properties" version "1.5.1"
+}
+
+
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
 apply plugin: 'org.springframework.boot'
@@ -20,7 +26,10 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'org.bk.samples'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 1.8
+ext {
+	sourceCompatibility = 11
+	targetCompatibility = 11
+}
 compileKotlin {
 	kotlinOptions {
 		freeCompilerArgs = ["-Xjsr305=strict"]

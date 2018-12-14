@@ -7,15 +7,13 @@ import reactor.test.StepVerifier
 import sample.dyn.config.DbMigrator
 import sample.dyn.model.Hotel
 import sample.dyn.rules.LocalDynamoExtension
-import java.util.UUID
 
 class HotelRepoTest {
 
     @Test
-    fun saveGetHotel() {
+    fun saveHotel() {
         val hotelRepo = DynamoHotelRepo(localDynamoExtension.client!!)
-        val key = UUID.randomUUID().toString()
-        val hotel = Hotel(id = key, name = "test hotel", address = "test address", state = "OR", zip = "zip")
+        val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val resp = hotelRepo.saveHotel(hotel)
 
         StepVerifier.create(resp)
@@ -27,11 +25,10 @@ class HotelRepoTest {
     @Test
     fun deleteHotel() {
         val hotelRepo = DynamoHotelRepo(localDynamoExtension.client!!)
-        val key = UUID.randomUUID().toString()
-        val hotel = Hotel(id = key, name = "test hotel", address = "test address", state = "OR", zip = "zip")
+        val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val deleteResp = hotelRepo
                 .saveHotel(hotel)
-                .flatMap { hotelRepo.deleteHotel(key) }
+                .flatMap { hotelRepo.deleteHotel("1") }
 
         StepVerifier.create(deleteResp)
                 .expectNext(true)

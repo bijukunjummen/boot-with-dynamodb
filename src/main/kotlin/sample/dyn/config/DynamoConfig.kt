@@ -7,6 +7,7 @@ import sample.dyn.DynamoProperties
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientBuilder
 import java.net.URI
 
 
@@ -15,7 +16,7 @@ class DynamoConfig {
 
     @Bean
     fun dynamoDbClient(dynamoProperties: DynamoProperties): DynamoDbAsyncClient {
-        val builder = DynamoDbAsyncClient.builder()
+        val builder:DynamoDbAsyncClientBuilder = DynamoDbAsyncClient.builder()
                 .region(Region.of(dynamoProperties.region))
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())
 
