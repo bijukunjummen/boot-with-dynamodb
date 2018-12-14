@@ -65,6 +65,42 @@ class HotelControllerWebTest {
     }
 
     @Test
+    fun testGetHotel() {
+        val expectedHotel = Hotel(id = "2", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
+
+        whenever(hotelRepo.getHotel("2"))
+                .thenReturn(Mono.just(expectedHotel))
+
+        whenever(hotelRepo.getHotel("3"))
+                .thenReturn(Mono.empty())
+
+
+        webTestClient.get()
+                .uri("/hotels/2")
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .json("""
+                    | {
+                    |   "id": "2",
+                    |   "name": "Test Hotel",
+                    |   "zip": "zip",
+                    |   "address": "Test Address",
+                    |   "state": "OR"
+                    | }
+
+                """.trimMargin())
+
+        webTestClient.get()
+                .uri("/hotels/3")
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .exchange()
+                .expectStatus().isNotFound
+
+    }
+
+    @Test
     fun testUpdateHotelWithNoExistingEntity() {
 
         whenever(hotelRepo.getHotel(ArgumentMatchers.anyString()))
