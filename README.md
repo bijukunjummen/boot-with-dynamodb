@@ -38,3 +38,16 @@ Get Hotels by State names:
 http "http://localhost:8080/hotels?state=OR"
 http "http://localhost:8080/hotels?state=WA"
 ```
+
+Get Hotels by ID:
+
+```
+http "http://localhost:8080/hotels/1"
+http "http://localhost:8080/hotels/2"
+http "http://localhost:8080/hotels/3"
+```
+
+Update Hotel:
+```
+http PUT :8080/hotels id=1 name=test1updated address=address1 zip=zip1 state=OR
+```
