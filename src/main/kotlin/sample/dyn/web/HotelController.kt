@@ -45,18 +45,6 @@ class HotelController(val hotelRepo: HotelRepo) {
                 }
     }
 
-    @RequestMapping(value = ["/hotels/{id}"], method = [RequestMethod.GET])
-    fun getHotel(@PathVariable("id") id: String): Mono<ResponseEntity<Hotel>> {
-        return hotelRepo.getHotel(id)
-                .map { hotel ->
-                    ResponseEntity.status(HttpStatus.OK).body(hotel)
-                }.defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).build())
-                .onErrorResume { t ->
-                    logger.error(t.message, t)
-                    Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
-                }
-    }
-
     @RequestMapping(value = ["/hotels"], method = [RequestMethod.GET])
     fun getHotelsByState(@RequestParam("state") state: String): Flux<Hotel> {
         return hotelRepo.findHotelsByState(state)
