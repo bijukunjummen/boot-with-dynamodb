@@ -93,7 +93,7 @@ class HotelRepoLocalDynamoTestContainerTest {
         @JvmStatic
         fun beforeAll() {
             dynamoDB.start()
-            val dbMigrator = DbMigrator(getAsyncClient(dynamoDB), getSyncClient(dynamoDB))
+            val dbMigrator = DbMigrator(getSyncClient(dynamoDB))
             dbMigrator.migrate()
         }
 

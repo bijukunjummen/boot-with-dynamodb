@@ -2,7 +2,6 @@ package sample.dyn.config
 
 import reactor.core.publisher.Mono
 import sample.dyn.Constants
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest
@@ -20,7 +19,7 @@ import java.time.Duration
 import javax.annotation.PostConstruct
 
 
-class DbMigrator(private val dynamoDbAsyncClient: DynamoDbAsyncClient, private val syncClient: DynamoDbClient) {
+class DbMigrator(private val syncClient: DynamoDbClient) {
 
     @PostConstruct
     fun migrate() {
@@ -28,12 +27,13 @@ class DbMigrator(private val dynamoDbAsyncClient: DynamoDbAsyncClient, private v
                 .tableName(Constants.TABLE_NAME)
                 .build()
 
-        val describeTable = dynamoDbAsyncClient
-                .describeTable(describeTableRequest)
 
-        val migrationResult = Mono.fromCompletionStage(describeTable)
+        val migrationResult = Mono.fromSupplier {
+            syncClient
+                    .describeTable(describeTableRequest)
+        }
                 .onErrorResume { error ->
-                    if (error.cause is ResourceNotFoundException) {
+                    if (error is ResourceNotFoundException) {
                         val byStateIndex = GlobalSecondaryIndex.builder()
                                 .indexName(Constants.HOTELS_BY_STATE_INDEX)
                                 .provisionedThroughput(ProvisionedThroughput.builder()
@@ -78,16 +78,18 @@ class DbMigrator(private val dynamoDbAsyncClient: DynamoDbAsyncClient, private v
                                 .build()
 
                         Mono
-                                .fromCompletionStage(dynamoDbAsyncClient.createTable(createTableRequest))
+                                .fromSupplier { syncClient.createTable(createTableRequest) }
                                 .flatMap {
-                                    Mono.fromSupplier {syncClient
-                                            .describeTable(describeTableRequest)}
+                                    Mono.fromSupplier {
+                                        syncClient
+                                                .describeTable(describeTableRequest)
+                                    }
                                             .map { describeTable ->
                                                 if (describeTable.table().tableStatus() != TableStatus.ACTIVE) {
                                                     throw RuntimeException("Table Not Ready")
                                                 }
                                                 describeTable
-                                             }
+                                            }
                                             .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(2))
                                 }
                     } else {

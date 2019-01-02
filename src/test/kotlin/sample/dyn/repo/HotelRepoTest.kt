@@ -84,7 +84,7 @@ class HotelRepoTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            val dbMigrator = DbMigrator(localDynamoExtension.asyncClient!!, localDynamoExtension.syncClient!!)
+            val dbMigrator = DbMigrator(localDynamoExtension.syncClient!!)
             dbMigrator.migrate()
         }
 

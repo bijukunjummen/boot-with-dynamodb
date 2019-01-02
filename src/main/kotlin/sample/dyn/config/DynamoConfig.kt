@@ -44,7 +44,7 @@ class DynamoConfig {
 
     @Bean
     fun dbMigrator(dynamoDbAsyncClient: DynamoDbAsyncClient, dynamoDbSyncClient: DynamoDbClient): DbMigrator {
-        return DbMigrator(dynamoDbAsyncClient, dynamoDbSyncClient)
+        return DbMigrator(dynamoDbSyncClient)
     }
 
 }
