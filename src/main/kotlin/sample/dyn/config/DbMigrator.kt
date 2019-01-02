@@ -3,6 +3,7 @@ package sample.dyn.config
 import reactor.core.publisher.Mono
 import sample.dyn.Constants
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest
@@ -14,10 +15,12 @@ import software.amazon.awssdk.services.dynamodb.model.ProjectionType
 import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType
+import software.amazon.awssdk.services.dynamodb.model.TableStatus
+import java.time.Duration
 import javax.annotation.PostConstruct
 
 
-class DbMigrator(private val dynamoDbAsyncClient: DynamoDbAsyncClient) {
+class DbMigrator(private val dynamoDbAsyncClient: DynamoDbAsyncClient, private val syncClient: DynamoDbClient) {
 
     @PostConstruct
     fun migrate() {
@@ -77,8 +80,15 @@ class DbMigrator(private val dynamoDbAsyncClient: DynamoDbAsyncClient) {
                         Mono
                                 .fromCompletionStage(dynamoDbAsyncClient.createTable(createTableRequest))
                                 .flatMap {
-                                    Mono.fromCompletionStage(dynamoDbAsyncClient
-                                            .describeTable(describeTableRequest))
+                                    Mono.fromSupplier {syncClient
+                                            .describeTable(describeTableRequest)}
+                                            .map { describeTable ->
+                                                if (describeTable.table().tableStatus() != TableStatus.ACTIVE) {
+                                                    throw RuntimeException("Table Not Ready")
+                                                }
+                                                describeTable
+                                             }
+                                            .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(2))
                                 }
                     } else {
                         Mono.error(error)

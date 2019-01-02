@@ -71,13 +71,15 @@ dependencies {
 	}
 	testImplementation("org.mockito:mockito-core:2.23.4")
 	testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
+	testImplementation("org.testcontainers:dynalite:1.10.4")
+	testImplementation("org.testcontainers:junit-jupiter:1.10.4")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
 
 dependencyManagement {
 	imports {
-		mavenBom 'software.amazon.awssdk:bom:2.0.0'
+		mavenBom 'software.amazon.awssdk:bom:2.2.0'
 	}
 }
 

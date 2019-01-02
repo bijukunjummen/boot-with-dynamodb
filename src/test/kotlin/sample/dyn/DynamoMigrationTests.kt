@@ -8,7 +8,7 @@ import sample.dyn.rules.LocalDynamoExtension
 class DynamoMigrationTests {
     @Test
     fun testMigrations() {
-        val migrator = DbMigrator(localDynamoExtension.client!!)
+        val migrator = DbMigrator(localDynamoExtension.asyncClient!!, localDynamoExtension.syncClient!!)
         migrator.migrate()
     }
 

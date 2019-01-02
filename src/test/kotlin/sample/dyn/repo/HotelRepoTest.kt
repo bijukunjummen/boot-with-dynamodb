@@ -12,7 +12,7 @@ class HotelRepoTest {
 
     @Test
     fun saveHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.client!!)
+        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val resp = hotelRepo.saveHotel(hotel)
 
@@ -24,7 +24,7 @@ class HotelRepoTest {
 
     @Test
     fun deleteHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.client!!)
+        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val deleteResp = hotelRepo
                 .saveHotel(hotel)
@@ -38,7 +38,7 @@ class HotelRepoTest {
 
     @Test
     fun deleteNonExistentHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.client!!)
+        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
         val deleteResp = hotelRepo.deleteHotel("1")
 
         StepVerifier.create(deleteResp)
@@ -49,7 +49,7 @@ class HotelRepoTest {
 
     @Test
     fun findHotelsByState() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.client!!)
+        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
         val hotel1 = Hotel(id = "1", name = "test hotel1", address = "test address1", state = "OR", zip = "zip")
         val hotel2 = Hotel(id = "2", name = "test hotel2", address = "test address2", state = "OR", zip = "zip")
         val hotel3 = Hotel(id = "3", name = "test hotel3", address = "test address3", state = "WA", zip = "zip")
@@ -84,8 +84,7 @@ class HotelRepoTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            println("BEFORE ALL CALLED..")
-            val dbMigrator = DbMigrator(localDynamoExtension.client!!)
+            val dbMigrator = DbMigrator(localDynamoExtension.asyncClient!!, localDynamoExtension.syncClient!!)
             dbMigrator.migrate()
         }
 

@@ -5,10 +5,10 @@ import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import sample.dyn.DynamoMigrationTests
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import java.net.ServerSocket
 import java.net.URI
 import java.nio.file.Paths
@@ -17,7 +17,8 @@ class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
 
     private var server: DynamoDBProxyServer? = null
     var endpoint: String? = null
-    var client: DynamoDbAsyncClient? = null
+    var asyncClient: DynamoDbAsyncClient? = null
+    var syncClient: DynamoDbClient? = null
 
     override fun beforeAll(context: ExtensionContext) {
         val currentPath = Paths.get(".")
@@ -39,11 +40,18 @@ class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
         System.setProperty("aws.secretAccessKey", "test-secret-key")
 
 
-        val clientBuilder = DynamoDbAsyncClient.builder()
+        val asyncClientBuilder = DynamoDbAsyncClient.builder()
                 .region(Region.US_EAST_1)
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())
-        clientBuilder.endpointOverride(URI.create(this.endpoint))
-        this.client = clientBuilder.build()
+                .endpointOverride(URI.create(this.endpoint))
+
+        this.asyncClient = asyncClientBuilder.build()
+
+        val syncClientBuilder = DynamoDbClient.builder().region(Region.US_EAST_1)
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
+                .endpointOverride(URI.create(this.endpoint))
+
+        this.syncClient = syncClientBuilder.build()
 
     }
 

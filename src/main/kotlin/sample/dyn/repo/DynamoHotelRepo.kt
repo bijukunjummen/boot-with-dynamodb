@@ -40,7 +40,7 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
     }
 
     override fun getHotel(id: String): Mono<Hotel> {
-        val getItemRequest = GetItemRequest.builder()
+        val getItemRequest: GetItemRequest = GetItemRequest.builder()
                 .key(mapOf(Constants.ID to AttributeValue.builder().s(id).build()))
                 .tableName(Constants.TABLE_NAME)
                 .build()
