@@ -30,7 +30,7 @@ class DynamoConfig {
     }
 
     @Bean
-    fun dynampoDbSyncClient(dynamoProperties: DynamoProperties): DynamoDbClient {
+    fun dynamoDbSyncClient(dynamoProperties: DynamoProperties): DynamoDbClient {
         val builder:DynamoDbClientBuilder = DynamoDbClient.builder()
                 .region(Region.of(dynamoProperties.region))
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())

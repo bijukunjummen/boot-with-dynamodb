@@ -18,7 +18,6 @@ import sample.dyn.model.Hotel
 import sample.dyn.repo.HotelRepo
 
 
-@ExtendWith(SpringExtension::class)
 @WebFluxTest(value = [HotelController::class, HotelAdditionalRoutes::class])
 class HotelControllerWebTest {
     @Autowired
