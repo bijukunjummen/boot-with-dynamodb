@@ -7,12 +7,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest(
-        classes = [DynamoProperties::class],
-        properties = ["dynamo.endpoint=http://some-test-end-point", "dynamo.region=sample-region"]
+    classes = [DynamoProperties::class],
+    properties = ["dynamo.endpoint=http://some-test-end-point", "dynamo.region=sample-region"]
 )
-@EnableConfigurationProperties(value=[DynamoProperties::class])
+@EnableConfigurationProperties(value = [DynamoProperties::class])
 class DynamoPropertiesTest {
-
     @Autowired
     lateinit var dynamoProperties: DynamoProperties
 

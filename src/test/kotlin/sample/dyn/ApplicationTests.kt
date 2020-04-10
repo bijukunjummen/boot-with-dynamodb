@@ -15,7 +15,6 @@ class ApplicationTests {
 
     }
 
-
     companion object {
         @RegisterExtension
         @JvmField
@@ -24,7 +23,6 @@ class ApplicationTests {
 
     @Configuration
     class SpringConfig {
-
         @Bean
         fun dynamoProperties(): DynamoProperties {
             return DynamoProperties(localDynamoExtension.endpoint!!, "us-east-1")

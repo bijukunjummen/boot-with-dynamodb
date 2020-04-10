@@ -30,9 +30,9 @@ class DynamoConfigTest {
         val resp = hotelRepo.saveHotel(hotel)
 
         StepVerifier.create(resp)
-                .expectNext(hotel)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel)
+            .expectComplete()
+            .verify()
     }
 
     @Test
@@ -40,13 +40,13 @@ class DynamoConfigTest {
         val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val deleteResp = hotelRepo
-                .saveHotel(hotel)
-                .flatMap { hotelRepo.deleteHotel("1") }
+            .saveHotel(hotel)
+            .flatMap { hotelRepo.deleteHotel("1") }
 
         StepVerifier.create(deleteResp)
-                .expectNext(true)
-                .expectComplete()
-                .verify()
+            .expectNext(true)
+            .expectComplete()
+            .verify()
     }
 
     @Test
@@ -55,9 +55,9 @@ class DynamoConfigTest {
         val deleteResp = hotelRepo.deleteHotel("1")
 
         StepVerifier.create(deleteResp)
-                .expectNext(true)
-                .expectComplete()
-                .verify()
+            .expectNext(true)
+            .expectComplete()
+            .verify()
     }
 
     @Test
@@ -69,23 +69,23 @@ class DynamoConfigTest {
 
 
         val resp = hotelRepo.saveHotel(hotel1)
-                .then(hotelRepo.saveHotel(hotel2))
-                .then(hotelRepo.saveHotel(hotel3))
+            .then(hotelRepo.saveHotel(hotel2))
+            .then(hotelRepo.saveHotel(hotel3))
 
         StepVerifier.create(resp)
-                .expectNext(hotel3)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel3)
+            .expectComplete()
+            .verify()
 
         StepVerifier.create(hotelRepo.findHotelsByState("OR"))
-                .expectNext(hotel1, hotel2)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel1, hotel2)
+            .expectComplete()
+            .verify()
 
         StepVerifier.create(hotelRepo.findHotelsByState("WA"))
-                .expectNext(hotel3)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel3)
+            .expectComplete()
+            .verify()
 
     }
 
@@ -94,9 +94,9 @@ class DynamoConfigTest {
         @Bean
         fun dynamoDbAsyncClient(dynamoProperties: DynamoProperties): DynamoDbAsyncClient {
             val builder: DynamoDbAsyncClientBuilder = DynamoDbAsyncClient.builder()
-                    .region(Region.of("us-east-1"))
-                    .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                    .endpointOverride(URI.create(localDynamoExtension.endpoint!!))
+                .region(Region.of("us-east-1"))
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
+                .endpointOverride(URI.create(localDynamoExtension.endpoint!!))
 
             return builder.build()
         }
@@ -104,9 +104,9 @@ class DynamoConfigTest {
         @Bean
         fun dynamoDbSyncClient(dynamoProperties: DynamoProperties): DynamoDbClient {
             val builder: DynamoDbClientBuilder = DynamoDbClient.builder()
-                    .region(Region.of("us-east-1"))
-                    .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                    .endpointOverride(URI.create(localDynamoExtension.endpoint!!))
+                .region(Region.of("us-east-1"))
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
+                .endpointOverride(URI.create(localDynamoExtension.endpoint!!))
 
             return builder.build()
         }

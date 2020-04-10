@@ -24,9 +24,9 @@ class HotelRepoLocalDynamoTestContainerTest {
         val resp = hotelRepo.saveHotel(hotel)
 
         StepVerifier.create(resp)
-                .expectNext(hotel)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel)
+            .expectComplete()
+            .verify()
     }
 
     @Test
@@ -34,13 +34,13 @@ class HotelRepoLocalDynamoTestContainerTest {
         val hotelRepo = DynamoHotelRepo(getAsyncClient(dynamoDB))
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val deleteResp = hotelRepo
-                .saveHotel(hotel)
-                .flatMap { hotelRepo.deleteHotel("1") }
+            .saveHotel(hotel)
+            .flatMap { hotelRepo.deleteHotel("1") }
 
         StepVerifier.create(deleteResp)
-                .expectNext(true)
-                .expectComplete()
-                .verify()
+            .expectNext(true)
+            .expectComplete()
+            .verify()
     }
 
     @Test
@@ -49,9 +49,9 @@ class HotelRepoLocalDynamoTestContainerTest {
         val deleteResp = hotelRepo.deleteHotel("1")
 
         StepVerifier.create(deleteResp)
-                .expectNext(true)
-                .expectComplete()
-                .verify()
+            .expectNext(true)
+            .expectComplete()
+            .verify()
     }
 
     @Test
@@ -63,31 +63,30 @@ class HotelRepoLocalDynamoTestContainerTest {
 
 
         val resp = hotelRepo.saveHotel(hotel1)
-                .then(hotelRepo.saveHotel(hotel2))
-                .then(hotelRepo.saveHotel(hotel3))
+            .then(hotelRepo.saveHotel(hotel2))
+            .then(hotelRepo.saveHotel(hotel3))
 
         StepVerifier.create(resp)
-                .expectNext(hotel3)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel3)
+            .expectComplete()
+            .verify()
 
         StepVerifier.create(hotelRepo.findHotelsByState("OR"))
-                .expectNext(hotel1, hotel2)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel1, hotel2)
+            .expectComplete()
+            .verify()
 
         StepVerifier.create(hotelRepo.findHotelsByState("WA"))
-                .expectNext(hotel3)
-                .expectComplete()
-                .verify()
+            .expectNext(hotel3)
+            .expectComplete()
+            .verify()
 
     }
 
 
-
     companion object {
         val dynamoDB: KGenericContainer = KGenericContainer("amazon/dynamodb-local:1.11.119")
-                .withExposedPorts(8000)
+            .withExposedPorts(8000)
 
         @BeforeAll
         @JvmStatic
@@ -107,22 +106,31 @@ class HotelRepoLocalDynamoTestContainerTest {
             val endpointUri = "http://" + dynamoDB.getContainerIpAddress() + ":" +
                     dynamoDB.getMappedPort(8000)
             val builder: DynamoDbAsyncClientBuilder = DynamoDbAsyncClient.builder()
-                    .endpointOverride(URI.create(endpointUri))
-                    .region(Region.US_EAST_1)
-                    .credentialsProvider(StaticCredentialsProvider
-                            .create(AwsBasicCredentials
-                                    .create("acc", "sec")))
+                .endpointOverride(URI.create(endpointUri))
+                .region(Region.US_EAST_1)
+                .credentialsProvider(
+                    StaticCredentialsProvider
+                        .create(
+                            AwsBasicCredentials
+                                .create("acc", "sec")
+                        )
+                )
             return builder.build()
         }
+
         fun getSyncClient(dynamoDB: KGenericContainer): DynamoDbClient {
             val endpointUri = "http://" + dynamoDB.getContainerIpAddress() + ":" +
                     dynamoDB.getMappedPort(8000)
             val builder: DynamoDbClientBuilder = DynamoDbClient.builder()
-                    .endpointOverride(URI.create(endpointUri))
-                    .region(Region.US_EAST_1)
-                    .credentialsProvider(StaticCredentialsProvider
-                            .create(AwsBasicCredentials
-                                    .create("acc", "sec")))
+                .endpointOverride(URI.create(endpointUri))
+                .region(Region.US_EAST_1)
+                .credentialsProvider(
+                    StaticCredentialsProvider
+                        .create(
+                            AwsBasicCredentials
+                                .create("acc", "sec")
+                        )
+                )
             return builder.build()
         }
     }

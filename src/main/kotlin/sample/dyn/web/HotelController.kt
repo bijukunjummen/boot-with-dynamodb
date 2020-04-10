@@ -21,12 +21,12 @@ class HotelController(val hotelRepo: HotelRepo) {
     @RequestMapping(value = ["/hotels"], method = [RequestMethod.POST])
     fun save(@RequestBody hotel: Hotel): Mono<ResponseEntity<Hotel>> {
         return hotelRepo.saveHotel(hotel)
-                .map { saved ->
-                    ResponseEntity.status(HttpStatus.CREATED).body(saved)
-                }.onErrorResume { t ->
-                    logger.error(t.message, t)
-                    Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
-                }
+            .map { saved ->
+                ResponseEntity.status(HttpStatus.CREATED).body(saved)
+            }.onErrorResume { t ->
+                logger.error(t.message, t)
+                Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+            }
     }
 
     @RequestMapping(value = ["/hotels"], method = [RequestMethod.GET])

@@ -23,14 +23,15 @@ class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
     override fun beforeAll(context: ExtensionContext) {
         val currentPath = Paths.get(".")
         val libPath = currentPath.toAbsolutePath()
-                .parent
-                .resolve("build")
-                .resolve("native-libs")
+            .parent
+            .resolve("build")
+            .resolve("native-libs")
 
 
         System.setProperty("sqlite4java.library.path", libPath.toAbsolutePath().toString())
         val port = randomFreePort()
-        val dynamoDbServer = ServerRunner.createServerFromCommandLineArgs(arrayOf("-inMemory", "-port", Integer.toString(port)))
+        val dynamoDbServer =
+            ServerRunner.createServerFromCommandLineArgs(arrayOf("-inMemory", "-port", Integer.toString(port)))
         dynamoDbServer.start()
 
         server = dynamoDbServer
@@ -41,15 +42,15 @@ class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
 
 
         val asyncClientBuilder = DynamoDbAsyncClient.builder()
-                .region(Region.US_EAST_1)
-                .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                .endpointOverride(URI.create(this.endpoint))
+            .region(Region.US_EAST_1)
+            .credentialsProvider(DefaultCredentialsProvider.builder().build())
+            .endpointOverride(URI.create(this.endpoint))
 
         this.asyncClient = asyncClientBuilder.build()
 
         val syncClientBuilder = DynamoDbClient.builder().region(Region.US_EAST_1)
-                .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                .endpointOverride(URI.create(this.endpoint))
+            .credentialsProvider(DefaultCredentialsProvider.builder().build())
+            .endpointOverride(URI.create(this.endpoint))
 
         this.syncClient = syncClientBuilder.build()
 

@@ -30,16 +30,15 @@ class HotelControllerWebTest {
     @Test
     fun testCreateHotel() {
         val expectedHotel = Hotel(id = "1", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
-
         whenever(hotelRepo.saveHotel(any()))
-                .thenReturn(Mono.just(expectedHotel))
-
-
+            .thenReturn(Mono.just(expectedHotel))
         webTestClient.post()
-                .uri("/hotels")
-                .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .body(BodyInserters
-                        .fromObject("""
+            .uri("/hotels")
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
+            .body(
+                BodyInserters
+                    .fromObject(
+                        """
                             | {
                             |   "id": "1",
                             |   "name": "Test Hotel",
@@ -47,11 +46,14 @@ class HotelControllerWebTest {
                             |   "address": "Test Address",
                             |   "state": "OR"
                             | }
-                            """.trimMargin()))
-                .exchange()
-                .expectStatus().isCreated
-                .expectBody()
-                .json("""
+                            """.trimMargin()
+                    )
+            )
+            .exchange()
+            .expectStatus().isCreated
+            .expectBody()
+            .json(
+                """
                     | {
                     |   "id": "1",
                     |   "name": "Test Hotel",
@@ -59,8 +61,8 @@ class HotelControllerWebTest {
                     |   "address": "Test Address",
                     |   "state": "OR"
                     | }
-
-                """.trimMargin())
+                """.trimMargin()
+            )
     }
 
     @Test
@@ -68,19 +70,20 @@ class HotelControllerWebTest {
         val expectedHotel = Hotel(id = "2", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
 
         whenever(hotelRepo.getHotel("2"))
-                .thenReturn(Mono.just(expectedHotel))
+            .thenReturn(Mono.just(expectedHotel))
 
         whenever(hotelRepo.getHotel("3"))
-                .thenReturn(Mono.empty())
+            .thenReturn(Mono.empty())
 
 
         webTestClient.get()
-                .uri("/hotels/2")
-                .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .json("""
+            .uri("/hotels/2")
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .json(
+                """
                     | {
                     |   "id": "2",
                     |   "name": "Test Hotel",
@@ -89,13 +92,14 @@ class HotelControllerWebTest {
                     |   "state": "OR"
                     | }
 
-                """.trimMargin())
+                """.trimMargin()
+            )
 
         webTestClient.get()
-                .uri("/hotels/3")
-                .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .exchange()
-                .expectStatus().isNotFound
+            .uri("/hotels/3")
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
+            .exchange()
+            .expectStatus().isNotFound
 
     }
 
@@ -103,14 +107,16 @@ class HotelControllerWebTest {
     fun testUpdateHotelWithNoExistingEntity() {
 
         whenever(hotelRepo.getHotel(ArgumentMatchers.anyString()))
-                .thenReturn(Mono.empty())
+            .thenReturn(Mono.empty())
 
 
         webTestClient.put()
-                .uri("/hotels/2")
-                .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .body(BodyInserters
-                        .fromObject("""
+            .uri("/hotels/2")
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
+            .body(
+                BodyInserters
+                    .fromObject(
+                        """
                             | {
                             |   "id": "2",
                             |   "name": "Test Hotel",
@@ -118,9 +124,11 @@ class HotelControllerWebTest {
                             |   "address": "Test Address",
                             |   "state": "OR"
                             | }
-                            """.trimMargin()))
-                .exchange()
-                .expectStatus().isNotFound
+                            """.trimMargin()
+                    )
+            )
+            .exchange()
+            .expectStatus().isNotFound
     }
 
     @Test
@@ -128,19 +136,21 @@ class HotelControllerWebTest {
         val expectedHotel = Hotel(id = "2", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
 
         whenever(hotelRepo.getHotel(Mockito.anyString()))
-                .thenReturn(Mono.just(expectedHotel))
+            .thenReturn(Mono.just(expectedHotel))
 
         whenever(hotelRepo.saveHotel(any()))
-                .thenAnswer { invocation ->
-                    val hotel: Hotel = invocation.getArgument(0)
-                    Mono.just(hotel)
-                }
+            .thenAnswer { invocation ->
+                val hotel: Hotel = invocation.getArgument(0)
+                Mono.just(hotel)
+            }
 
         webTestClient.put()
-                .uri("/hotels/2")
-                .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .body(BodyInserters
-                        .fromObject("""
+            .uri("/hotels/2")
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
+            .body(
+                BodyInserters
+                    .fromObject(
+                        """
                             | {
                             |   "id": "2",
                             |   "name": "Test Hotel Updated",
@@ -148,11 +158,14 @@ class HotelControllerWebTest {
                             |   "address": "Test Address",
                             |   "state": "OR"
                             | }
-                            """.trimMargin()))
-                .exchange()
-                .expectStatus().isCreated
-                .expectBody()
-                .json("""
+                            """.trimMargin()
+                    )
+            )
+            .exchange()
+            .expectStatus().isCreated
+            .expectBody()
+            .json(
+                """
                     | {
                     |   "id": "2",
                     |   "name": "Test Hotel Updated",
@@ -160,6 +173,7 @@ class HotelControllerWebTest {
                     |   "address": "Test Address",
                     |   "state": "OR"
                     | }
-                """.trimMargin())
+                """.trimMargin()
+            )
     }
 }

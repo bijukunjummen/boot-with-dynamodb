@@ -19,9 +19,9 @@ class HotelAdditionalRoutes {
         GET("/hotels/{id}") { req ->
             val id = req.pathVariable("id")
             val response: Mono<ServerResponse> = hotelRepo.getHotel(id)
-                    .flatMap { hotel ->
-                        ServerResponse.ok().body(BodyInserters.fromObject(hotel))
-                    }
+                .flatMap { hotel ->
+                    ServerResponse.ok().body(BodyInserters.fromObject(hotel))
+                }
             response.switchIfEmpty(ServerResponse.notFound().build())
         }
 
@@ -30,19 +30,19 @@ class HotelAdditionalRoutes {
             val hotelReq: Mono<Hotel> = req.bodyToMono()
 
             val hotelToReturn: Mono<Hotel> =
-                    hotelRepo.getHotel(id)
-                            .flatMap {
-                                //hotel with id exists in db
-                                hotelReq.flatMap { hotel ->
-                                    val toSave: Hotel = hotel.copy(id = id)
-                                    hotelRepo.saveHotel(toSave)
-                                }
-                            }
+                hotelRepo.getHotel(id)
+                    .flatMap {
+                        //hotel with id exists in db
+                        hotelReq.flatMap { hotel ->
+                            val toSave: Hotel = hotel.copy(id = id)
+                            hotelRepo.saveHotel(toSave)
+                        }
+                    }
 
             hotelToReturn.flatMap { hotel ->
                 ServerResponse
-                        .status(HttpStatus.CREATED)
-                        .body(BodyInserters.fromObject(hotel))
+                    .status(HttpStatus.CREATED)
+                    .body(BodyInserters.fromObject(hotel))
             }.switchIfEmpty(ServerResponse.notFound().build())
         }
     }

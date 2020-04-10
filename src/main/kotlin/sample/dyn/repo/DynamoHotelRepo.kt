@@ -18,48 +18,48 @@ import java.util.stream.Collectors
 class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
     override fun saveHotel(hotel: Hotel): Mono<Hotel> {
         val putItemRequest = PutItemRequest.builder()
-                .tableName(Constants.TABLE_NAME)
-                .item(HotelMapper.toMap(hotel))
-                .build()
+            .tableName(Constants.TABLE_NAME)
+            .item(HotelMapper.toMap(hotel))
+            .build()
         return Mono.fromCompletionStage(dynamoClient.putItem(putItemRequest))
-                .flatMap {
-                    getHotel(hotel.id)
-                }
+            .flatMap {
+                getHotel(hotel.id)
+            }
     }
 
     override fun deleteHotel(id: String): Mono<Boolean> {
         val deleteItemRequest = DeleteItemRequest.builder()
-                .key(mapOf(Constants.ID to AttributeValue.builder().s(id).build()))
-                .tableName(Constants.TABLE_NAME)
-                .build()
+            .key(mapOf(Constants.ID to AttributeValue.builder().s(id).build()))
+            .tableName(Constants.TABLE_NAME)
+            .build()
 
         return Mono.fromCompletionStage(dynamoClient.deleteItem(deleteItemRequest))
-                .map {
-                    true
-                }
+            .map {
+                true
+            }
     }
 
     override fun getHotel(id: String): Mono<Hotel> {
         val getItemRequest: GetItemRequest = GetItemRequest.builder()
-                .key(mapOf(Constants.ID to AttributeValue.builder().s(id).build()))
-                .tableName(Constants.TABLE_NAME)
-                .build()
+            .key(mapOf(Constants.ID to AttributeValue.builder().s(id).build()))
+            .tableName(Constants.TABLE_NAME)
+            .build()
 
         return Mono.fromCompletionStage(dynamoClient.getItem(getItemRequest))
-                .map { resp ->
-                    HotelMapper.fromMap(id, resp.item())
-                }
+            .map { resp ->
+                HotelMapper.fromMap(id, resp.item())
+            }
     }
 
     override fun findHotelsByState(state: String): Flux<Hotel> {
         val qSpec = QueryRequest
-                .builder()
-                .tableName(Constants.TABLE_NAME)
-                .indexName(Constants.HOTELS_BY_STATE_INDEX)
-                .keyConditionExpression("#st=:state")
-                .expressionAttributeNames(mapOf("#st" to "state"))
-                .expressionAttributeValues(mapOf(":state" to AttributeValue.builder().s(state).build()))
-                .build()
+            .builder()
+            .tableName(Constants.TABLE_NAME)
+            .indexName(Constants.HOTELS_BY_STATE_INDEX)
+            .keyConditionExpression("#st=:state")
+            .expressionAttributeNames(mapOf("#st" to "state"))
+            .expressionAttributeValues(mapOf(":state" to AttributeValue.builder().s(state).build()))
+            .build()
 
         return Mono.from(dynamoClient.queryPaginator(qSpec)).flatMapIterable { resp ->
             resp.items().stream().map { item ->
