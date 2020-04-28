@@ -1,8 +1,10 @@
 package sample.dyn.repo
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import sample.dyn.config.DbMigrator
 import sample.dyn.model.Hotel
@@ -17,14 +19,24 @@ import java.net.URI
 
 
 class HotelRepoDynaliteTestContainerTest {
+
     @Test
     fun saveHotel() {
         val hotelRepo = DynamoHotelRepo(getAsyncClient(dynamoDB))
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
-        val resp = hotelRepo.saveHotel(hotel)
+        val resp: Mono<Hotel> = hotelRepo.saveHotel(hotel)
 
         StepVerifier.create(resp)
             .expectNext(hotel)
+            .expectComplete()
+            .verify()
+
+        val respUpdated: Mono<Hotel> = hotelRepo.updateHotel(hotel)
+
+        StepVerifier.create(respUpdated)
+            .assertNext { updatedHotel: Hotel ->
+                assertThat(updatedHotel.version).isEqualTo(2)
+            }
             .expectComplete()
             .verify()
     }
@@ -134,4 +146,5 @@ class HotelRepoDynaliteTestContainerTest {
             return builder.build()
         }
     }
+
 }

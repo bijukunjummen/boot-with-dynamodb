@@ -8,4 +8,5 @@ object Constants {
     const val STATE = "state"
     const val ADDRESS = "address"
     const val HOTELS_BY_STATE_INDEX = "HotelsByState"
+    const val VERSION = "version"
 }

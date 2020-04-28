@@ -7,11 +7,11 @@ import sample.dyn.Constants
 import sample.dyn.model.Hotel
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.Condition
 import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest
 import java.util.stream.Collectors
 
 @Repository
@@ -19,9 +19,35 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
     override fun saveHotel(hotel: Hotel): Mono<Hotel> {
         val putItemRequest = PutItemRequest.builder()
             .tableName(Constants.TABLE_NAME)
-            .item(HotelMapper.toMap(hotel))
+            .item(HotelDynamoAttributesMapper.toMap(hotel))
             .build()
         return Mono.fromCompletionStage(dynamoClient.putItem(putItemRequest))
+            .flatMap {
+                getHotel(hotel.id)
+            }
+    }
+
+    override fun updateHotel(hotel: Hotel): Mono<Hotel> {
+        val putItemRequest = UpdateItemRequest.builder()
+            .tableName(Constants.TABLE_NAME)
+            .key(HotelDynamoAttributesMapper.keyMap(hotel))
+            .updateExpression(
+                """
+                SET #name=:name,#state=:state,address=:address,zip=:zip 
+                ADD version :inc
+            """
+            )
+            .conditionExpression("version = :version")
+            .expressionAttributeValues(HotelDynamoAttributesMapper.toUpdateExpressionMap(hotel))
+            .expressionAttributeNames(
+                mapOf(
+                    "#name" to "name",
+                    "#state" to "state"
+                )
+            )
+//            .attributeUpdates(HotelDynamoAttributesMapper.toUpdateMap(hotel))
+            .build()
+        return Mono.fromCompletionStage(dynamoClient.updateItem(putItemRequest))
             .flatMap {
                 getHotel(hotel.id)
             }
@@ -47,7 +73,7 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
 
         return Mono.fromCompletionStage(dynamoClient.getItem(getItemRequest))
             .map { resp ->
-                HotelMapper.fromMap(id, resp.item())
+                HotelDynamoAttributesMapper.fromMap(id, resp.item())
             }
     }
 
@@ -63,7 +89,7 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
 
         return Mono.from(dynamoClient.queryPaginator(qSpec)).flatMapIterable { resp ->
             resp.items().stream().map { item ->
-                HotelMapper.fromMap(item[Constants.ID]!!.s(), item)
+                HotelDynamoAttributesMapper.fromMap(item[Constants.ID]!!.s(), item)
             }.collect(Collectors.toList())
         }
 
