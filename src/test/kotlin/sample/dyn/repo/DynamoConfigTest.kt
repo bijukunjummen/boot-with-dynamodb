@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import reactor.test.StepVerifier
 import sample.dyn.DynamoProperties
 import sample.dyn.config.DbMigrator

@@ -1,7 +1,7 @@
 package sample.dyn.config
 
 import reactor.core.publisher.Mono
-import sample.dyn.Constants
+import sample.dyn.repo.DynamoHotelRepo
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest
@@ -25,7 +25,7 @@ class DbMigrator(private val syncClient: DynamoDbClient) {
     @PostConstruct
     fun migrate() {
         val describeTableRequest = DescribeTableRequest.builder()
-            .tableName(Constants.TABLE_NAME)
+            .tableName(DynamoHotelRepo.TABLE_NAME)
             .build()
 
 
@@ -36,7 +36,7 @@ class DbMigrator(private val syncClient: DynamoDbClient) {
             .onErrorResume { error ->
                 if (error is ResourceNotFoundException) {
                     val byStateIndex = GlobalSecondaryIndex.builder()
-                        .indexName(Constants.HOTELS_BY_STATE_INDEX)
+                        .indexName(DynamoHotelRepo.HOTELS_BY_STATE_INDEX)
                         .provisionedThroughput(
                             ProvisionedThroughput.builder()
                                 .readCapacityUnits(10)
@@ -49,28 +49,28 @@ class DbMigrator(private val syncClient: DynamoDbClient) {
                     byStateIndex
                         .keySchema(
                             KeySchemaElement.builder()
-                                .attributeName(Constants.STATE)
+                                .attributeName(DynamoHotelRepo.STATE)
                                 .keyType(KeyType.HASH).build(),
                             KeySchemaElement.builder()
-                                .attributeName(Constants.NAME)
+                                .attributeName(DynamoHotelRepo.NAME)
                                 .keyType(KeyType.RANGE).build()
                         )
 
                     val createTableRequest = CreateTableRequest.builder()
                         .attributeDefinitions(
                             AttributeDefinition.builder()
-                                .attributeName(Constants.ID)
+                                .attributeName(DynamoHotelRepo.ID)
                                 .attributeType(ScalarAttributeType.S).build(),
                             AttributeDefinition.builder()
-                                .attributeName(Constants.NAME)
+                                .attributeName(DynamoHotelRepo.NAME)
                                 .attributeType(ScalarAttributeType.S).build(),
                             AttributeDefinition.builder()
-                                .attributeName(Constants.STATE)
+                                .attributeName(DynamoHotelRepo.STATE)
                                 .attributeType(ScalarAttributeType.S).build()
                         )
                         .keySchema(
                             KeySchemaElement.builder()
-                                .attributeName(Constants.ID)
+                                .attributeName(DynamoHotelRepo.ID)
                                 .keyType(KeyType.HASH).build()
                         )
                         .provisionedThroughput(
@@ -79,7 +79,7 @@ class DbMigrator(private val syncClient: DynamoDbClient) {
                                 .writeCapacityUnits(10)
                                 .build()
                         )
-                        .tableName(Constants.TABLE_NAME)
+                        .tableName(DynamoHotelRepo.TABLE_NAME)
                         .globalSecondaryIndexes(byStateIndex.build())
                         .build()
 
