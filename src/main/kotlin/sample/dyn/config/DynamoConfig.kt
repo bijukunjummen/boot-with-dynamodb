@@ -20,7 +20,6 @@ class DynamoConfig {
     fun dynamoDbAsyncClient(dynamoProperties: DynamoProperties): DynamoDbAsyncClient {
         val builder: DynamoDbAsyncClientBuilder = DynamoDbAsyncClient.builder()
             .region(Region.of(dynamoProperties.region))
-            .credentialsProvider(DefaultCredentialsProvider.builder().build())
 
         if (!StringUtils.isEmpty(dynamoProperties.endpoint)) {
             builder.endpointOverride(URI.create(dynamoProperties.endpoint))
@@ -33,7 +32,6 @@ class DynamoConfig {
     fun dynamoDbSyncClient(dynamoProperties: DynamoProperties): DynamoDbClient {
         val builder: DynamoDbClientBuilder = DynamoDbClient.builder()
             .region(Region.of(dynamoProperties.region))
-            .credentialsProvider(DefaultCredentialsProvider.builder().build())
 
         if (!StringUtils.isEmpty(dynamoProperties.endpoint)) {
             builder.endpointOverride(URI.create(dynamoProperties.endpoint))

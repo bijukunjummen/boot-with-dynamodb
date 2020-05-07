@@ -3,12 +3,20 @@
 This sample demonstrates an end to end reactive application using Spring Boot 2 Webflux
 and reactive/non-blocking AWS SDK 2+
 
-## Setting up a local AWS DynamoDB
+## Setting up a local stack version of AWS Services
 
-Follow the instructions [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
-to setup a local version of DynamoDB.
+Follow the instructions [here](https://github.com/localstack/localstack)
+to setup a local version of SNS/SQS.
 
-Once DynamoDB is running, start up the application using
+Start up localstack:
+
+```
+cd localstack
+./start-localstack-mac.sh
+# OR docker-compose up
+```
+
+## Start up the Application
 
 ```
 ./gradlew bootRun
@@ -20,34 +28,34 @@ Once DynamoDB is running, start up the application using
 Make sure that a table has been created in dynamoDB:
 
 ```
- aws --endpoint-url=http://localhost:8000 dynamodb describe-table --table-name hotels
+ aws --endpoint-url=http://localhost:4569 dynamodb describe-table --table-name hotels
 ```
 
 Create Hotel entities:
 
 ```
-http -v :8080/hotels id=1 name=test1 address=address1 zip=zip1 state=OR
-http -v :8080/hotels id=2 name=test2 address=address2 zip=zip2 state=OR
-http -v :8080/hotels id=3 name=test3 address=address3 zip=zip3 state=WA
+http -v :9080/hotels id=1 name=test1 address=address1 zip=zip1 state=OR
+http -v :9080/hotels id=2 name=test2 address=address2 zip=zip2 state=OR
+http -v :9080/hotels id=3 name=test3 address=address3 zip=zip3 state=WA
 ```
 
 
 Get Hotels by State names:
 
 ```
-http "http://localhost:8080/hotels?state=OR"
-http "http://localhost:8080/hotels?state=WA"
+http "http://localhost:9080/hotels?state=OR"
+http "http://localhost:9080/hotels?state=WA"
 ```
 
 Get Hotels by ID:
 
 ```
-http "http://localhost:8080/hotels/1"
-http "http://localhost:8080/hotels/2"
-http "http://localhost:8080/hotels/3"
+http "http://localhost:9080/hotels/1"
+http "http://localhost:9080/hotels/2"
+http "http://localhost:9080/hotels/3"
 ```
 
 Update Hotel:
 ```
-http PUT :8080/hotels id=1 name=test1updated address=address1 zip=zip1 state=OR
+http PUT :9080/hotels/1 name=test1updated address=address1 zip=zip1 state=OR version=1
 ```

@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemResponse
+import java.util.concurrent.CompletableFuture
 import java.util.stream.Collectors
 
 @Repository
@@ -36,7 +38,7 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
     }
 
     override fun updateHotel(hotel: Hotel): Mono<Hotel> {
-        val putItemRequest = UpdateItemRequest.builder()
+        val updateItemRequest = UpdateItemRequest.builder()
             .tableName(TABLE_NAME)
             .key(
                 mapOf(
@@ -70,7 +72,8 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
                 )
             )
             .build()
-        return Mono.fromCompletionStage(dynamoClient.updateItem(putItemRequest))
+        val updateItem: CompletableFuture<UpdateItemResponse> = dynamoClient.updateItem(updateItemRequest)
+        return Mono.fromCompletionStage(updateItem)
             .flatMap {
                 getHotel(hotel.id)
             }

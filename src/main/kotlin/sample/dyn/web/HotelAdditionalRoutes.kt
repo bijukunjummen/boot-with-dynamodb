@@ -35,7 +35,7 @@ class HotelAdditionalRoutes {
                         //hotel with id exists in db
                         hotelReq.flatMap { hotel ->
                             val toSave: Hotel = hotel.copy(id = id)
-                            hotelRepo.saveHotel(toSave)
+                            hotelRepo.updateHotel(toSave)
                         }
                     }
 
