@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.util.StringUtils
 import sample.dyn.DynamoProperties
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import sample.dyn.migrator.DynamoMigrator
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientBuilder
@@ -41,8 +41,12 @@ class DynamoConfig {
     }
 
     @Bean
-    fun dbMigrator(dynamoDbAsyncClient: DynamoDbAsyncClient, dynamoDbSyncClient: DynamoDbClient): DbMigrator {
-        return DbMigrator(dynamoDbSyncClient)
+    fun dynamoMigrator(dynamoDbSyncClient: DynamoDbClient): DynamoMigrator {
+        return DynamoMigrator(dynamoDbSyncClient)
     }
 
+    @Bean
+    fun migrations(dynamoMigrator: DynamoMigrator): DbMigrations {
+        return DbMigrations(dynamoMigrator)
+    }
 }

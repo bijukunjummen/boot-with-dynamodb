@@ -8,9 +8,10 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import reactor.test.StepVerifier
 import sample.dyn.DynamoProperties
-import sample.dyn.config.DbMigrator
+import sample.dyn.config.DbMigrations
+import sample.dyn.migrator.DynamoMigrator
 import sample.dyn.model.Hotel
-import sample.dyn.rules.LocalDynamoExtension
+import sample.dyn.rules.TestContainerDynamoDBExtension
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
@@ -24,7 +25,7 @@ class DynamoConfigTest {
 
     @Test
     fun saveHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient)
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val resp = hotelRepo.saveHotel(hotel)
 
@@ -36,7 +37,7 @@ class DynamoConfigTest {
 
     @Test
     fun deleteHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient)
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val deleteResp = hotelRepo
             .saveHotel(hotel)
@@ -50,7 +51,7 @@ class DynamoConfigTest {
 
     @Test
     fun deleteNonExistentHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient)
         val deleteResp = hotelRepo.deleteHotel("1")
 
         StepVerifier.create(deleteResp)
@@ -61,7 +62,7 @@ class DynamoConfigTest {
 
     @Test
     fun findHotelsByState() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient)
         val hotel1 = Hotel(id = "1", name = "test hotel1", address = "test address1", state = "OR", zip = "zip")
         val hotel2 = Hotel(id = "2", name = "test hotel2", address = "test address2", state = "OR", zip = "zip")
         val hotel3 = Hotel(id = "3", name = "test hotel3", address = "test address3", state = "WA", zip = "zip")
@@ -95,7 +96,7 @@ class DynamoConfigTest {
             val builder: DynamoDbAsyncClientBuilder = DynamoDbAsyncClient.builder()
                 .region(Region.of("us-east-1"))
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                .endpointOverride(URI.create(localDynamoExtension.endpoint!!))
+                .endpointOverride(URI.create(dynamoExtension.endpoint))
 
             return builder.build()
         }
@@ -105,7 +106,7 @@ class DynamoConfigTest {
             val builder: DynamoDbClientBuilder = DynamoDbClient.builder()
                 .region(Region.of("us-east-1"))
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                .endpointOverride(URI.create(localDynamoExtension.endpoint!!))
+                .endpointOverride(URI.create(dynamoExtension.endpoint))
 
             return builder.build()
         }
@@ -114,13 +115,17 @@ class DynamoConfigTest {
     companion object {
         @RegisterExtension
         @JvmField
-        val localDynamoExtension = LocalDynamoExtension()
+        val dynamoExtension = TestContainerDynamoDBExtension()
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            val dbMigrator = DbMigrator(localDynamoExtension.syncClient!!)
-            dbMigrator.migrate()
+            val migrator: DynamoMigrator = DynamoMigrator(dynamoExtension.syncClient)
+            val dbMigrator = DbMigrations(migrator)
+
+            migrator
+                .migrate(listOf(dbMigrator.hotelTableDefinition()))
+                .subscribe()
         }
 
     }

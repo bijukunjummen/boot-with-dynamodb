@@ -4,7 +4,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import reactor.test.StepVerifier
-import sample.dyn.config.DbMigrator
+import sample.dyn.config.DbMigrations
+import sample.dyn.migrator.DynamoMigrator
 import sample.dyn.model.Hotel
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -14,7 +15,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientBuilder
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder
 import java.net.URI
-
 
 class HotelRepoLocalDynamoTestContainerTest {
     @Test
@@ -85,15 +85,18 @@ class HotelRepoLocalDynamoTestContainerTest {
 
 
     companion object {
-        val dynamoDB: KGenericContainer = KGenericContainer("amazon/dynamodb-local:1.11.119")
+        val dynamoDB: KGenericContainer = KGenericContainer("amazon/dynamodb-local:1.13.0")
             .withExposedPorts(8000)
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
             dynamoDB.start()
-            val dbMigrator = DbMigrator(getSyncClient(dynamoDB))
-            dbMigrator.migrate()
+            val migrator: DynamoMigrator = DynamoMigrator(getSyncClient(dynamoDB))
+            val dbMigrator = DbMigrations(migrator)
+            migrator
+                .migrate(listOf(dbMigrator.hotelTableDefinition()))
+                .subscribe()
         }
 
         @AfterAll

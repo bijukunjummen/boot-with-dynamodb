@@ -20,7 +20,7 @@ class HotelAdditionalRoutes {
             val id = req.pathVariable("id")
             val response: Mono<ServerResponse> = hotelRepo.getHotel(id)
                 .flatMap { hotel ->
-                    ServerResponse.ok().body(BodyInserters.fromObject(hotel))
+                    ServerResponse.ok().body(BodyInserters.fromValue(hotel))
                 }
             response.switchIfEmpty(ServerResponse.notFound().build())
         }
@@ -42,7 +42,7 @@ class HotelAdditionalRoutes {
             hotelToReturn.flatMap { hotel ->
                 ServerResponse
                     .status(HttpStatus.CREATED)
-                    .body(BodyInserters.fromObject(hotel))
+                    .body(BodyInserters.fromValue(hotel))
             }.switchIfEmpty(ServerResponse.notFound().build())
         }
     }

@@ -3,14 +3,12 @@ package sample.dyn.web
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import reactor.core.publisher.Mono
@@ -26,7 +24,6 @@ class HotelControllerWebTest {
     @MockBean
     lateinit var hotelRepo: HotelRepo
 
-
     @Test
     fun testCreateHotel() {
         val expectedHotel = Hotel(id = "1", name = "Test Hotel", address = "Test Address", state = "OR", zip = "zip")
@@ -37,7 +34,7 @@ class HotelControllerWebTest {
             .header(HttpHeaders.CONTENT_TYPE, "application/json")
             .body(
                 BodyInserters
-                    .fromObject(
+                    .fromValue(
                         """
                             | {
                             |   "id": "1",
@@ -115,7 +112,7 @@ class HotelControllerWebTest {
             .header(HttpHeaders.CONTENT_TYPE, "application/json")
             .body(
                 BodyInserters
-                    .fromObject(
+                    .fromValue(
                         """
                             | {
                             |   "id": "2",
@@ -138,7 +135,7 @@ class HotelControllerWebTest {
         whenever(hotelRepo.getHotel(Mockito.anyString()))
             .thenReturn(Mono.just(expectedHotel))
 
-        whenever(hotelRepo.saveHotel(any()))
+        whenever(hotelRepo.updateHotel(any()))
             .thenAnswer { invocation ->
                 val hotel: Hotel = invocation.getArgument(0)
                 Mono.just(hotel)
@@ -149,7 +146,7 @@ class HotelControllerWebTest {
             .header(HttpHeaders.CONTENT_TYPE, "application/json")
             .body(
                 BodyInserters
-                    .fromObject(
+                    .fromValue(
                         """
                             | {
                             |   "id": "2",

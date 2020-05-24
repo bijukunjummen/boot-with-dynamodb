@@ -14,7 +14,6 @@ import java.net.URI
 import java.nio.file.Paths
 
 class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
-
     private var server: DynamoDBProxyServer? = null
     var endpoint: String? = null
     var asyncClient: DynamoDbAsyncClient? = null

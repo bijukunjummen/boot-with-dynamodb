@@ -4,15 +4,16 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import reactor.test.StepVerifier
-import sample.dyn.config.DbMigrator
+import sample.dyn.config.DbMigrations
+import sample.dyn.migrator.DynamoMigrator
 import sample.dyn.model.Hotel
-import sample.dyn.rules.LocalDynamoExtension
+import sample.dyn.rules.TestContainerDynamoDBExtension
 
 class HotelRepoTest {
 
     @Test
     fun saveHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient);
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val resp = hotelRepo.saveHotel(hotel)
 
@@ -23,8 +24,20 @@ class HotelRepoTest {
     }
 
     @Test
+    fun updateHotel() {
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient);
+        val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
+        val resp = hotelRepo.updateHotel(hotel)
+
+        StepVerifier.create(resp)
+            .expectNext(hotel)
+            .expectComplete()
+            .verify()
+    }
+
+    @Test
     fun deleteHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient);
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
         val deleteResp = hotelRepo
             .saveHotel(hotel)
@@ -38,7 +51,7 @@ class HotelRepoTest {
 
     @Test
     fun deleteNonExistentHotel() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient);
         val deleteResp = hotelRepo.deleteHotel("1")
 
         StepVerifier.create(deleteResp)
@@ -49,7 +62,7 @@ class HotelRepoTest {
 
     @Test
     fun findHotelsByState() {
-        val hotelRepo = DynamoHotelRepo(localDynamoExtension.asyncClient!!)
+        val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient);
         val hotel1 = Hotel(id = "1", name = "test hotel1", address = "test address1", state = "OR", zip = "zip")
         val hotel2 = Hotel(id = "2", name = "test hotel2", address = "test address2", state = "OR", zip = "zip")
         val hotel3 = Hotel(id = "3", name = "test hotel3", address = "test address3", state = "WA", zip = "zip")
@@ -77,13 +90,16 @@ class HotelRepoTest {
     companion object {
         @RegisterExtension
         @JvmField
-        val localDynamoExtension = LocalDynamoExtension()
+        val dynamoExtension = TestContainerDynamoDBExtension()
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            val dbMigrator = DbMigrator(localDynamoExtension.syncClient!!)
-            dbMigrator.migrate()
+            val migrator = DynamoMigrator(dynamoExtension.syncClient)
+            val dbMigrator = DbMigrations(migrator)
+            migrator
+                .migrate(listOf(dbMigrator.hotelTableDefinition()))
+                .subscribe()
         }
 
     }
