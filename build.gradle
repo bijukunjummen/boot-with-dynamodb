@@ -81,7 +81,7 @@ test {
 
 task copyNativeDeps(type: Copy) {
 	mkdir "build/native-libs"
-	from(configurations.testCompileClasspath) {
+	from(configurations.testRuntimeClasspath) {
 		include '*.dll'
 		include '*.dylib'
 		include '*.so'
@@ -93,7 +93,7 @@ compileTestJava {
     dependsOn copyNativeDeps
 }
 
-task hello {
+task showAllConfigurations {
     doLast {
         println project.configurations
         project.configurations.each() {

@@ -14,10 +14,10 @@ import java.net.URI
 import java.nio.file.Paths
 
 class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
-    private var server: DynamoDBProxyServer? = null
-    var endpoint: String? = null
-    var asyncClient: DynamoDbAsyncClient? = null
-    var syncClient: DynamoDbClient? = null
+    private lateinit var server: DynamoDBProxyServer
+    lateinit var endpoint: String
+    lateinit var asyncClient: DynamoDbAsyncClient
+    lateinit var syncClient: DynamoDbClient
 
     override fun beforeAll(context: ExtensionContext) {
         val currentPath = Paths.get(".")
@@ -52,16 +52,12 @@ class LocalDynamoExtension : BeforeAllCallback, AfterAllCallback {
             .endpointOverride(URI.create(this.endpoint))
 
         this.syncClient = syncClientBuilder.build()
-
     }
 
     override fun afterAll(context: ExtensionContext) {
-        if (this.server != null) {
-            this.server!!.stop()
-            System.clearProperty("aws.accessKeyId")
-            System.clearProperty("aws.secretAccessKey")
-        }
-
+        this.server.stop()
+        System.clearProperty("aws.accessKeyId")
+        System.clearProperty("aws.secretAccessKey")
     }
 
     private fun randomFreePort(): Int = ServerSocket(0).use { serverSocket -> return serverSocket.localPort }

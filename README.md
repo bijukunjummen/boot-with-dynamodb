@@ -28,7 +28,7 @@ cd localstack
 Make sure that a table has been created in dynamoDB:
 
 ```
- aws --endpoint-url=http://localhost:4569 dynamodb describe-table --table-name hotels
+ aws --endpoint-url=http://localhost:4566 dynamodb describe-table --table-name hotels
 ```
 
 Create Hotel entities:
@@ -43,16 +43,16 @@ http -v :9080/hotels id=3 name=test3 address=address3 zip=zip3 state=WA
 Get Hotels by State names:
 
 ```
-http "http://localhost:9080/hotels?state=OR"
-http "http://localhost:9080/hotels?state=WA"
+http ":9080/hotels?state=OR"
+http ":9080/hotels?state=WA"
 ```
 
 Get Hotels by ID:
 
 ```
-http "http://localhost:9080/hotels/1"
-http "http://localhost:9080/hotels/2"
-http "http://localhost:9080/hotels/3"
+http ":9080/hotels/1"
+http ":9080/hotels/2"
+http ":9080/hotels/3"
 ```
 
 Update Hotel:

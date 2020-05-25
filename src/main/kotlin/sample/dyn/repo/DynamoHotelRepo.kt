@@ -54,14 +54,14 @@ class DynamoHotelRepo(val dynamoClient: DynamoDbAsyncClient) : HotelRepo {
                 ADD version :inc
             """
             )
-//            .conditionExpression("version = :version")
+            .conditionExpression("version = :version")
             .expressionAttributeValues(
                 mapOf(
                     ":${NAME}" to AttributeValue.builder().s(hotel.name).build(),
                     ":${ZIP}" to AttributeValue.builder().s(hotel.zip).build(),
                     ":${STATE}" to AttributeValue.builder().s(hotel.state).build(),
                     ":${ADDRESS}" to AttributeValue.builder().s(hotel.address).build(),
-//                    ":${VERSION}" to AttributeValue.builder().n(hotel.version.toString()).build(),
+                    ":${VERSION}" to AttributeValue.builder().n(hotel.version.toString()).build(),
                     ":inc" to AttributeValue.builder().n("1").build()
                 )
             )
