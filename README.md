@@ -6,7 +6,7 @@ and reactive/non-blocking AWS SDK 2+
 ## Setting up a local stack version of AWS Services
 
 Follow the instructions [here](https://github.com/localstack/localstack)
-to setup a local version of SNS/SQS.
+to setup a local version of AWS DynamoDB.
 
 Start up localstack:
 
@@ -59,3 +59,12 @@ Update Hotel:
 ```
 http PUT :9080/hotels/1 name=test1updated address=address1 zip=zip1 state=OR version=1
 ```
+
+Version Demo:
+```
+http :9080/hotels id=4 name=name address=address zip=zip state=OR
+http PUT :9080/hotels/4 name=name1 address=address zip=zip state=OR version=1
+http PUT :9080/hotels/4 name=name1 address=address1 zip=zip state=OR version=2
+```
+
+
