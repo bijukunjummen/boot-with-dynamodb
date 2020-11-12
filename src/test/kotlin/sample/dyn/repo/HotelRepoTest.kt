@@ -27,10 +27,10 @@ class HotelRepoTest {
     fun updateHotel() {
         val hotelRepo = DynamoHotelRepo(dynamoExtension.asyncClient);
         val hotel = Hotel(id = "1", name = "test hotel", address = "test address", state = "OR", zip = "zip")
-        val resp = hotelRepo.updateHotel(hotel)
+        val resp = hotelRepo.saveHotel(hotel)
 
-        StepVerifier.create(resp)
-            .expectNext(hotel)
+        StepVerifier.create(resp.flatMap { savedHotel -> hotelRepo.updateHotel(savedHotel) })
+            .expectNext(hotel.copy(version = hotel.version + 1))
             .expectComplete()
             .verify()
     }
